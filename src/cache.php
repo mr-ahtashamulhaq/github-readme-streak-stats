@@ -54,7 +54,7 @@ function getCacheFilePath(string $key): string
 function ensureCacheDir(): bool
 {
     if (!is_dir(CACHE_DIR)) {
-        return mkdir(CACHE_DIR, 0755, true);
+        return @mkdir(CACHE_DIR, 0755, true);
     }
     return true;
 }
@@ -137,7 +137,7 @@ function setCachedStats(string $user, array $options, array $stats): bool
         return false;
     }
 
-    $result = file_put_contents($filePath, $data, LOCK_EX);
+    $result = @file_put_contents($filePath, $data, LOCK_EX);
     if ($result === false) {
         error_log("Failed to write cache file: " . $filePath);
         return false;
