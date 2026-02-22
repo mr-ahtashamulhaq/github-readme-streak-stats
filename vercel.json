@@ -6,7 +6,11 @@
   },
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/demo(.*)",
+      "dest": "/src/demo$1"
+    },
+    {
+      "src": "/((?!_next|favicon.ico|static).*)$",
       "dest": "/api/index.php"
     }
   ]
