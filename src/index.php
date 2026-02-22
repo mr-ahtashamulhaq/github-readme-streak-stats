@@ -8,16 +8,25 @@ require_once __DIR__ . "/stats.php";
 require_once __DIR__ . "/card.php";
 require_once __DIR__ . "/cache.php";
 
-// load .env
-$dotenv = \Dotenv\Dotenv::createImmutable(dirname(__DIR__, 1));
-$dotenv->safeLoad();
+// load .env if present (local dev); on Vercel, env vars are set as system environment variables
+$envPath = dirname(__DIR__, 1);
+if (file_exists($envPath . "/.env")) {
+    $dotenv = \Dotenv\Dotenv::createImmutable($envPath);
+    $dotenv->safeLoad();
+}
 
-// if environment variables are not loaded, display error
+// ensure TOKEN (and TOKEN2, TOKEN3, ...) from system env vars are accessible in $_SERVER
+// this bridges the gap when there is no .env file (e.g. Vercel deployment)
+if (!isset($_SERVER["TOKEN"]) && ($tok = getenv("TOKEN")) !== false) {
+    $_SERVER["TOKEN"] = $tok;
+    for ($i = 2; ($tok = getenv("TOKEN$i")) !== false; $i++) {
+        $_SERVER["TOKEN$i"] = $tok;
+    }
+}
+
+// if TOKEN is still not available, display error
 if (!isset($_SERVER["TOKEN"])) {
-    $message = file_exists(dirname(__DIR__ . "../.env", 1))
-        ? "Missing token in config. Check Contributing.md for details."
-        : ".env was not found. Check Contributing.md for details.";
-    renderOutput($message, 500);
+    renderOutput("TOKEN environment variable not set. Check Contributing.md for details.", 500);
 }
 
 // set cache to refresh once per day (24 hours)
